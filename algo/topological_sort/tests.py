@@ -1,8 +1,9 @@
 import unittest
 
-import kahns_algorithm
-import reverse_dfs
 from parameterized import parameterized
+
+from .kahns_algorithm import topological_sort as topological_sort_kahns
+from .reverse_dfs import topological_sort as topological_sort_reverse_dfs
 
 
 class TopologicalSortTest(unittest.TestCase):
@@ -16,7 +17,7 @@ class TopologicalSortTest(unittest.TestCase):
                 )
 
     @parameterized.expand(
-        [(kahns_algorithm.topological_sort,), (reverse_dfs.topological_sort,)],
+        [(topological_sort_kahns,), (topological_sort_reverse_dfs,)],
     )
     def test_topological_sort(self, function_to_test):
         # Test Case 1: Simple DAG with 5 nodes
