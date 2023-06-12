@@ -31,6 +31,6 @@ def topological_sort(dag: dict[str, list[str | tuple[str, int]]]) -> list[str]:
 
     # If there is a cycle, the in-degree of some node will never be 0
     if len(result) != len(dag):
-        raise Exception("Cycle detected in graph!")
+        raise ValueError("Cycle detected in graph!")
 
     return result

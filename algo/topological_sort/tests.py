@@ -28,7 +28,7 @@ class TopologicalSortTest(unittest.TestCase):
         # Test Case 2: DAG with cycles
         graph = {"A": ["B"], "B": ["C"], "C": ["A"]}
         # Since there are cycles, the topological sort should raise an exception
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             function_to_test(graph)
 
         # Test Case 3: Empty graph

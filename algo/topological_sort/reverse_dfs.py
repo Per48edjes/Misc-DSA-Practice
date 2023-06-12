@@ -5,7 +5,7 @@ def topological_sort(dag: dict[str, list[str | tuple[str, int]]]) -> list[str]:
     def dfs(node: str) -> None:
         # -1 corresponds to having visited the node in the current connected component
         if visited[node] == -1:
-            raise Exception("Cycle detected")
+            raise ValueError("Cycle detected in graph!")
 
         # 0 corresponds to unvisited
         if visited[node] == 0:

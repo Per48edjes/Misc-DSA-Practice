@@ -95,8 +95,11 @@ class BellmanFordTest(unittest.TestCase):
             "D": float("-inf"),
             "E": float("-inf"),
         }
-        result2 = function_to_test(graph2, start_node2)
-        self.assertEqual(result2, expected_result2)
+        try:
+            result2 = function_to_test(graph2, start_node2)
+            self.assertEqual(result2, expected_result2)
+        except Exception as e:
+            self.assertIsInstance(e, ValueError)
 
     # Test case 3: Disconnected graph
     @parameterized.expand([sssp_bellman_ford, sssp_bellman_ford_graph_dupe])

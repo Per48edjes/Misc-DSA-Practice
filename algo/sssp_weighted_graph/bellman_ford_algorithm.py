@@ -24,7 +24,7 @@ def find_shortest_path_distances(
             # but this would mean the shortest path is at least |V| edges
             # long, which implies the existence of a negative cycle.
             if distances[node] + edge_weight < distances[neighbor]:
-                distances[neighbor] = float("-inf")
+                raise ValueError("Negative cycle detected in graph.")
 
     return distances
 
