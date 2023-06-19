@@ -2,11 +2,12 @@ import unittest
 
 from parameterized import parameterized
 
-from .bellman_ford_algorithm import \
-    find_shortest_path_distances as sssp_bellman_ford
-from .bellman_ford_algorithm import \
-    find_shortest_path_distances_graph_dupe as sssp_bellman_ford_graph_dupe
+from .bellman_ford_algorithm import find_shortest_path_distances as sssp_bellman_ford
+from .bellman_ford_algorithm import (
+    find_shortest_path_distances_graph_dupe as sssp_bellman_ford_graph_dupe,
+)
 from .DAG_relaxation import find_shortest_path_distances as sssp_dag_relaxation
+from .dijkstras_algorithm import find_shortest_path_distances as sssp_dijkstra
 
 
 class DAGRelaxationTest(unittest.TestCase):
@@ -137,6 +138,49 @@ class BellmanFordTest(unittest.TestCase):
         expected_result5 = {"A": 0, "B": float("inf"), "C": float("inf")}
         result5 = function_to_test(graph5, start_node5)
         self.assertEqual(result5, expected_result5)
+
+
+class DijkstraTest(unittest.TestCase):
+    def test_shortest_path(self):
+        # Test case 1: Simple graph with positive weights
+        graph = {
+            "A": [("B", 4), ("C", 2)],
+            "B": [("A", 4), ("C", 1), ("D", 5)],
+            "C": [("A", 2), ("B", 1), ("D", 8)],
+            "D": [("B", 5), ("C", 8)],
+        }
+        start = "A"
+        expected_distances = {"A": 0, "B": 3, "C": 2, "D": 8}
+
+        distances = sssp_dijkstra(graph, start)
+        self.assertEqual(distances, expected_distances)
+
+    def test_unreachable_nodes(self):
+        # Test case 2: Graph with unreachable nodes
+        graph = {"A": [("B", 2), ("C", 3)], "B": [("A", 2)], "C": [("A", 3)]}
+        start = "A"
+        expected_distances = {"A": 0, "B": 2, "C": 3}
+
+        distances = sssp_dijkstra(graph, start)
+        self.assertEqual(distances, expected_distances)
+
+    def test_empty_graph(self):
+        # Test case 3: An empty graph
+        graph = {"A": []}
+        start = "A"
+        expected_distances = {"A": 0}
+
+        distances = sssp_dijkstra(graph, start)
+        self.assertEqual(distances, expected_distances)
+
+    def test_self_loop(self):
+        # Test case 4: Graph with self-loop
+        graph = {"A": [("A", 1)]}
+        start = "A"
+        expected_distances = {"A": 0}
+
+        distances = sssp_dijkstra(graph, start)
+        self.assertEqual(distances, expected_distances)
 
 
 if __name__ == "__main__":
