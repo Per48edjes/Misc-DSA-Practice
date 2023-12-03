@@ -29,6 +29,8 @@ library
       Day01.Part2
       Day02.Part1
       Day02.Part2
+      Day03.Part1
+      Day03.Part2
   other-modules:
       Paths_AoC2023
   autogen-modules:
@@ -50,6 +52,7 @@ library
     , bytestring
     , containers
     , errors
+    , mtl
     , split
     , text
     , unordered-containers
@@ -103,6 +106,8 @@ test-suite AoC2023-test
     , base >=4.7 && <5
     , containers
     , hspec
+    , hspec-expectations
+    , silently
     , text
     , unordered-containers
     , vector
