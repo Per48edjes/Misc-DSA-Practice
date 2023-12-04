@@ -6,6 +6,8 @@ import Day02.Part1
 import Day02.Part2
 import Day03.Part1
 import Day03.Part2
+import Day04.Part1
+import Day04.Part2
 
 main :: IO ()
 main = do
@@ -15,3 +17,5 @@ main = do
     putStrLn "Day 2, Part 2: " >> Day02.Part1.solution "inputs/day02.txt" Day02.Part2.evaluateGames >>= print
     putStrLn "Day 3, Part 1: " >> Day03.Part1.solution "inputs/day03.txt" Day03.Part1.sumPartNums >>= print
     putStrLn "Day 3, Part 2: " >> Day03.Part1.solution "inputs/day03.txt" Day03.Part2.sumGearRatios >>= print
+    putStrLn "Day 4, Part 1: " >> Day04.Part1.solution "inputs/day04.txt" Day04.Part1.scoreCards >>= print
+    putStrLn "Day 4, Part 2: " >> Day04.Part1.solution "inputs/day04.txt" Day04.Part2.countCards >>= print

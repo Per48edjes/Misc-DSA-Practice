@@ -4,6 +4,8 @@ import qualified Data.Set as S
 import Day01.Part2
 import Day03.Part1
 import Day03.Part2
+import Day04.Part1
+import Day04.Part2
 
 main :: IO ()
 main = hspec $ do
@@ -27,6 +29,16 @@ main = hspec $ do
             result `shouldBe` 4361
 
     describe "sumGearRatios" $ do
-        it "properly sums Part Numbers" $ do
+        it "properly sums gear ratios" $ do
             result <- Day03.Part1.solution "inputs/day03_test.txt" Day03.Part2.sumGearRatios
             result `shouldBe` 467835
+
+    describe "scoreCards" $ do
+        it "properly scores all Cards" $ do
+            result <- Day04.Part1.solution "inputs/day04_test.txt" Day04.Part1.scoreCards
+            result `shouldBe` 13
+
+    describe "countCards" $ do
+        it "properly counts all Cards" $ do
+            result <- Day04.Part1.solution "inputs/day04_test.txt" Day04.Part2.countCards
+            result `shouldBe` 30
