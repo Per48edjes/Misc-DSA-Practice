@@ -37,6 +37,8 @@ library
       Day05.Part2
       Day06.Part1
       Day06.Part2
+      Day07.Part1
+      Day07.Part2
   other-modules:
       Paths_AoC2023
   autogen-modules:
@@ -58,6 +60,7 @@ library
     , bytestring
     , containers
     , errors
+    , megaparsec
     , mtl
     , split
     , text
@@ -113,6 +116,7 @@ test-suite AoC2023-test
     , containers
     , hspec
     , hspec-expectations
+    , megaparsec
     , silently
     , text
     , unordered-containers

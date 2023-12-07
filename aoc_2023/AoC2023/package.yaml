@@ -58,9 +58,12 @@ library:
     - Day05.Part2
     - Day06.Part1
     - Day06.Part2
+    - Day07.Part1
+    - Day07.Part2
   dependencies:
     - mtl
     - attoparsec
+    - megaparsec
     - bytestring
     - containers
     - errors
@@ -92,6 +95,7 @@ tests:
       - AoC2023
       - unordered-containers
       - attoparsec
+      - megaparsec
       - containers
       - hspec
       - hspec-expectations
