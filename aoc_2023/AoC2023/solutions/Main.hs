@@ -14,6 +14,8 @@ import Day06.Part1
 import Day06.Part2
 import Day07.Part1
 import Day07.Part2
+import Day08.Part1
+import Day08.Part2
 
 main :: IO ()
 main = do
@@ -31,3 +33,5 @@ main = do
     putStrLn "Day 6, Part 2: " >> Day06.Part1.solution "inputs/day06.txt" Day06.Part2.marginOfError' >>= print
     putStrLn "Day 7, Part 1: " >> Day07.Part1.solution "inputs/day07.txt" Day07.Part1.evaluateHands >>= print
     putStrLn "Day 7, Part 2: " >> Day07.Part1.solution "inputs/day07.txt" Day07.Part2.evaluateHands' >>= print
+    putStrLn "Day 8, Part 1: " >> Day08.Part1.solution "inputs/day08.txt" Day08.Part1.countMoves >>= print
+    putStrLn "Day 8, Part 2: " >> Day08.Part1.solution "inputs/day08.txt" Day08.Part2.countMoves' >>= print
