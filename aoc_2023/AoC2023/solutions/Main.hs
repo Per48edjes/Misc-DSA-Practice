@@ -18,6 +18,7 @@ import Day08.Part1
 import Day08.Part2
 import Day09.Part1
 import Day09.Part2
+import Day10.Part1
 
 main :: IO ()
 main = do
@@ -38,4 +39,4 @@ main = do
     putStrLn "Day 8, Part 1: " >> Day08.Part1.solution "inputs/day08.txt" Day08.Part1.countMoves >>= print
     putStrLn "Day 8, Part 2: " >> Day08.Part1.solution "inputs/day08.txt" Day08.Part2.countMoves' >>= print
     putStrLn "Day 9, Part 1: " >> Day09.Part1.solution "inputs/day09.txt" Day09.Part1.sumExtrapolations >>= print
-    putStrLn "Day 9, Part 2: " >> Day09.Part1.solution "inputs/day09.txt" Day09.Part2.sumExtrapolations' >>= print
+    putStrLn "Day 10, Part 1: " >> Day10.Part1.solution "inputs/day10.txt" Day10.Part1.findLoopMidpointDistance >>= print
