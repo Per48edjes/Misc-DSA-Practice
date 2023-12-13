@@ -8,12 +8,12 @@ import Control.Applicative (liftA2)
 import Control.Monad.State (State, evalState, get, put)
 import Data.Attoparsec.Text
 import Data.Bifunctor (bimap)
-import Data.List (tails)
 import Data.Maybe (mapMaybe)
 import Data.Set (Set)
 import qualified Data.Set as S
 import qualified Data.Text.IO as TIO
 import qualified Data.Vector as V
+import Util (pairwiseCombinations)
 
 -- Types
 
@@ -138,9 +138,6 @@ getRelativeDirection (x, y) (x', y') = case bimap (x' -) (y' -) (x, y) of
 findIndices :: (Eq a) => V.Vector (V.Vector a) -> a -> [Coord]
 findIndices grid element =
     [(x, y) | x <- [0 .. (V.length grid - 1)], y <- [0 .. (V.length (grid V.! x) - 1)], grid V.! x V.! y == element]
-
-pairwiseCombinations :: [a] -> [(a, a)]
-pairwiseCombinations xs = [(x, y) | (x : ys) <- tails xs, y <- ys]
 
 -- | Get the pipe from a coord
 fromCoord :: PipeGrid -> Coord -> Pipe
