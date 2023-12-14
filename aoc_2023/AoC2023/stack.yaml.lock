@@ -18,6 +18,13 @@ packages:
       size: 374
   original:
     hackage: silently-1.2.5.3
+- completed:
+    hackage: memoize-1.1.2@sha256:d7701b55ed63434d1e8b507d0a76bb58f2fe31b7ce329132e1ca808c7001da49,1928
+    pantry-tree:
+      sha256: 8c99f1a87a270c8b8fb2238a0a94b346a986cb502753162dab909ed8b2ff44ad
+      size: 687
+  original:
+    hackage: memoize-1.1.2
 snapshots:
 - completed:
     sha256: 7d4b649cf368f9076d8aa049aa44efe58950971d105892734e9957b2a26a2186

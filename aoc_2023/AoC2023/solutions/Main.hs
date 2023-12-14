@@ -22,6 +22,8 @@ import Day10.Part1
 import Day10.Part2
 import Day11.Part1
 import Day11.Part2
+import Day12.Part1
+import Day12.Part2
 
 main :: IO ()
 main = do
@@ -47,3 +49,5 @@ main = do
     putStrLn "Day 10, Part 2: " >> Day10.Part1.solution "inputs/day10.txt" Day10.Part2.countLoopContainedElements >>= print
     putStrLn "Day 11, Part 1: " >> Day11.Part1.solution "inputs/day11.txt" Day11.Part1.sumGalaxyAPSPs >>= print
     putStrLn "Day 11, Part 2: " >> Day11.Part1.solution "inputs/day11.txt" Day11.Part2.sumGalaxyAPSPs' >>= print
+    putStrLn "Day 12, Part 1: " >> Day12.Part1.solution "inputs/day12.txt" Day12.Part1.sumArrangements >>= print
+    putStrLn "Day 12, Part 2: " >> Day12.Part1.solution "inputs/day12.txt" Day12.Part2.sumArrangements' >>= print
