@@ -6,6 +6,7 @@ import Day03.Part1
 import Day03.Part2
 import Day04.Part1
 import Day04.Part2
+import Util
 
 main :: IO ()
 main = hspec $ do
@@ -42,3 +43,27 @@ main = hspec $ do
         it "properly counts all Cards" $ do
             result <- Day04.Part1.solution "inputs/day04_test.txt" Day04.Part2.countCards
             result `shouldBe` 30
+
+    describe "floydTortoiseAndHare" $ do
+        it "returns Nothing for an empty list" $ do
+            floydTortoiseAndHare ([] :: [Int]) `shouldBe` Nothing
+
+        it "returns Nothing for a single-element list" $ do
+            floydTortoiseAndHare ([1] :: [Int]) `shouldBe` Nothing
+
+        it "returns Nothing for a list without a cycle" $ do
+            floydTortoiseAndHare ([1, 2] :: [Int]) `shouldBe` Nothing
+
+        it "returns Nothing for a list with a cycle length 1" $ do
+            floydTortoiseAndHare ([1, 1] :: [Int]) `shouldBe` Just (0, 1)
+
+        it "returns the correct entry point and cycle length for an infinite list of just one element" $ do
+            floydTortoiseAndHare (repeat 7 :: [Int]) `shouldBe` Just (0, 1)
+
+        it "returns the correct entry point and cycle length for a list with prefix" $ do
+            let listWithCycleAndTail = ([0, 1] ++ cycle [2, 3] :: [Int])
+            floydTortoiseAndHare listWithCycleAndTail `shouldBe` Just (2, 2)
+
+        it "returns the correct entry point and cycle length for a list without prefix" $ do
+            let listWithOnlyCycle = (cycle [6, 2, 3, 1] :: [Int])
+            floydTortoiseAndHare listWithOnlyCycle `shouldBe` Just (0, 4)
