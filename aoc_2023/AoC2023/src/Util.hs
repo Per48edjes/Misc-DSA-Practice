@@ -1,6 +1,7 @@
 module Util where
 
 import Data.List (subsequences, tails)
+import Data.Maybe (isNothing)
 import Data.Text (Text)
 import qualified Data.Text as T
 
@@ -41,3 +42,24 @@ pairwiseCombinations xs = [(x, y) | (x : ys) <- tails xs, y <- ys]
 -- | Generate all combinations of length k from a list
 combinationsOf :: Int -> [a] -> [[a]]
 combinationsOf k xs = filter ((k ==) . length) $ subsequences xs
+
+-- | Determines entry point index of cycle and the cycle length (if it exists) in a linked list
+floydTortoiseAndHare :: (Eq a) => [a] -> Maybe (Int, Int)
+floydTortoiseAndHare [] = Nothing
+floydTortoiseAndHare [_] = Nothing
+floydTortoiseAndHare [x, y] = if x == y then Just (0, 1) else Nothing
+floydTortoiseAndHare xs = go 0 0
+  where
+    xs' = zip [0 ..] xs
+    go t h
+        | isNothing (h `lookup` xs') = Nothing
+        | t /= h && t `lookup` xs' == h `lookup` xs' = go' 0 h
+        | otherwise = go (t + 1) (h + 2)
+    go' t h
+        | isNothing (h `lookup` xs') = Nothing
+        | t `lookup` xs' == h `lookup` xs' = go'' t (t + 1)
+        | otherwise = go' (t + 1) (h + 1)
+    go'' t h
+        | isNothing (h `lookup` xs') = Nothing
+        | t `lookup` xs' == h `lookup` xs' = Just (t, h - t)
+        | otherwise = go'' t (h + 1)

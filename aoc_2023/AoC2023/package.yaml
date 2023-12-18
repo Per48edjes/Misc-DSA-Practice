@@ -46,6 +46,7 @@ library:
   source-dirs:
     - src
   exposed-modules:
+    - Util
     - Day01.Part1
     - Day01.Part2
     - Day02.Part1
@@ -76,6 +77,7 @@ library:
     - Day14.Part2
   dependencies:
     - mtl
+    - array
     - attoparsec
     - megaparsec
     - bytestring
