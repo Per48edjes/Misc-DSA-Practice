@@ -28,6 +28,8 @@ import Day13.Part1
 import Day13.Part2
 import Day14.Part1
 import Day14.Part2
+import Day15.Part1
+import Day15.Part2
 
 main :: IO ()
 main = do
@@ -59,3 +61,5 @@ main = do
     putStrLn "Day 13, Part 2: " >> Day13.Part1.solution "inputs/day13.txt" Day13.Part2.summarizePatterns' >>= print
     putStrLn "Day 14, Part 1: " >> Day14.Part1.solution "inputs/day14.txt" Day14.Part1.calculateLoad >>= print
     putStrLn "Day 14, Part 2: " >> Day14.Part1.solution "inputs/day14.txt" Day14.Part2.calculateLoad' >>= print
+    putStrLn "Day 15, Part 1: " >> Day15.Part1.solution "inputs/day15.txt" Day15.Part1.sumResults >>= print
+    putStrLn "Day 15, Part 2: " >> Day15.Part1.solution "inputs/day15.txt" Day15.Part2.totalFocusingPower >>= print

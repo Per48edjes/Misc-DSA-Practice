@@ -6,6 +6,7 @@ import Day03.Part1
 import Day03.Part2
 import Day04.Part1
 import Day04.Part2
+import Day15.Part1
 import Util
 
 main :: IO ()
@@ -67,3 +68,7 @@ main = hspec $ do
         it "returns the correct entry point and cycle length for a list without prefix" $ do
             let listWithOnlyCycle = (cycle [6, 2, 3, 1] :: [Int])
             floydTortoiseAndHare listWithOnlyCycle `shouldBe` Just (0, 4)
+
+    describe "hash" $ do
+        it "properly hashes a sample Text" $ do
+            Day15.Part1.hash "HASH" `shouldBe` 52
