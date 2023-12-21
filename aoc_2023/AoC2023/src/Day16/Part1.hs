@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
+
 module Day16.Part1 where
 
 import Control.Applicative ((<|>))
