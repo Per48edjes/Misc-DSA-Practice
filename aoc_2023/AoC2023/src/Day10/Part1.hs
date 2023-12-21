@@ -18,7 +18,7 @@ import Util (pairwiseCombinations)
 -- Types
 
 data Direction = N | S | E | W | NW | NE | SW | SE
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 data Pipe = Pipe Direction Direction | Ground
     deriving (Eq, Show)

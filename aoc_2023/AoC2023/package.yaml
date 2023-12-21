@@ -77,6 +77,10 @@ library:
     - Day14.Part2
     - Day15.Part1
     - Day15.Part2
+    # Placeholder for Day 16
+    # Placeholder for Day 16
+    - Day17.Part1
+    - Day17.Part2
   dependencies:
     - mtl
     - array
@@ -86,6 +90,7 @@ library:
     - containers
     - extra
     - errors
+    - heap
     - memoize
     - split
     - text
