@@ -43,6 +43,10 @@ pairwiseCombinations xs = [(x, y) | (x : ys) <- tails xs, y <- ys]
 combinationsOf :: Int -> [a] -> [[a]]
 combinationsOf k xs = filter ((k ==) . length) $ subsequences xs
 
+-- | Swap elements of a pair
+swap :: (a, b) -> (b, a)
+swap (x, y) = (y, x)
+
 -- | Determines entry point index of cycle and the cycle length (if it exists) in a linked list
 floydTortoiseAndHare :: (Eq a) => [a] -> Maybe (Int, Int)
 floydTortoiseAndHare [] = Nothing

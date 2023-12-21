@@ -18,7 +18,7 @@ import Util (pairwiseCombinations)
 -- Types
 
 data Direction = N | S | E | W | NW | NE | SW | SE
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 data Pipe = Pipe Direction Direction | Ground
     deriving (Eq, Show)
@@ -33,11 +33,34 @@ type DFSState = (Set Coord, Int)
 
 -- Typeclasses & Instances
 
+class Orthogonal a where
+    isOrthogonal :: a -> a -> Bool
+
 class Opposable a where
     opposite :: a -> a
 
 class Connectable a where
     canConnect :: Direction -> a -> a -> Bool
+
+instance Orthogonal Direction where
+    isOrthogonal :: Direction -> Direction -> Bool
+    isOrthogonal N E = True
+    isOrthogonal E N = True
+    isOrthogonal N W = True
+    isOrthogonal W N = True
+    isOrthogonal S E = True
+    isOrthogonal E S = True
+    isOrthogonal S W = True
+    isOrthogonal W S = True
+    isOrthogonal NW NE = True
+    isOrthogonal NE NW = True
+    isOrthogonal NW SW = True
+    isOrthogonal SW NW = True
+    isOrthogonal NE SE = True
+    isOrthogonal SE NE = True
+    isOrthogonal SW SE = True
+    isOrthogonal SE SW = True
+    isOrthogonal _ _ = False
 
 instance Opposable Direction where
     opposite :: Direction -> Direction
