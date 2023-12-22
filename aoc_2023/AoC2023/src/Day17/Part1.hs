@@ -1,9 +1,9 @@
 module Day17.Part1 where
 
-import Debug.Trace (trace)
+import Debug.Trace (trace, traceM)
 
 import Control.Applicative ((<|>))
-import Control.Monad.State
+import Control.Monad.State.Strict
 import Data.Array (Array, (!))
 import qualified Data.Array as A
 import Data.Attoparsec.Text
@@ -11,6 +11,7 @@ import Data.Bifunctor (bimap)
 import Data.Char (digitToInt)
 import Data.Heap (MinPrioHeap)
 import qualified Data.Heap as H
+import qualified Data.List as L
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import qualified Data.Text.IO as TIO
@@ -45,18 +46,16 @@ shortestPathToBottomRight grid = shortestPathFromTopLeft (snd $ A.bounds grid) g
 
 shortestPathFromTopLeft :: Coord -> Grid -> Int
 shortestPathFromTopLeft endCoord grid =
-    let (_, dists) = execState (modifiedDijkstra grid) initialStateWithTrace
-        initialStateWithTrace = trace ("initialState: " ++ show initialState) initialState
-     in dists M.! endCoord
-  where
-    startCoord = (0, 0)
-    initialState = (H.singleton (0, (grid ! startCoord, 0, E)), M.singleton startCoord 0)
+    let
+        startCoord = (0, 0)
+        initialState = (H.singleton (0, (grid ! startCoord, 0, E)), M.singleton startCoord 0)
+        (_, dists) = execState (modifiedDijkstra grid) initialState
+     in
+        dists M.! endCoord
 
 modifiedDijkstra :: Grid -> DijkstraState
 modifiedDijkstra grid = do
     (pq, dists) <- get
-    -- BUG: pq is empty for some reason!
-    trace ("pq in modifiedDijkstra: " ++ show pq) $ return ()
     case H.view pq of
         Nothing -> do
             return ()
@@ -66,14 +65,14 @@ modifiedDijkstra grid = do
                 modifiedDijkstra grid
             | otherwise -> do
                 let neighborTraversals = traverseNeighbors grid node steps dir
-                    (pq'', dists') = foldr (relaxEdge dist) (pq', dists) neighborTraversals
+                    (pq'', dists') = L.foldl' (relaxEdge dist) (pq', dists) neighborTraversals
                 put (pq'', dists')
                 modifiedDijkstra grid
   where
-    relaxEdge :: Distance -> (Node, Steps, Direction) -> (PriorityQueue, DistancesMap) -> (PriorityQueue, DistancesMap)
-    relaxEdge dist (neighbor, steps, dir) (pq, dists)
-        | M.member (coord neighbor) dists && dist' < (dists M.! coord neighbor) = (H.insert (dist', (neighbor, steps, dir)) pq, M.insert (coord neighbor) dist' dists)
-        | otherwise = (pq, dists)
+    relaxEdge :: Distance -> (PriorityQueue, DistancesMap) -> (Node, Steps, Direction) -> (PriorityQueue, DistancesMap)
+    relaxEdge dist (pq, dists) (neighbor, steps, dir)
+        | M.member (coord neighbor) dists && dist' >= (dists M.! coord neighbor) = (pq, dists)
+        | otherwise = (H.insert (dist', (neighbor, steps, dir)) pq, M.insert (coord neighbor) dist' dists)
       where
         dist' = dist + weight neighbor
 
