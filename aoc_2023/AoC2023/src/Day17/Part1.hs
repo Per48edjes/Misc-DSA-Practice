@@ -1,5 +1,7 @@
 module Day17.Part1 where
 
+import Debug.Trace (trace)
+
 import Control.Applicative ((<|>))
 import Control.Monad.State
 import Data.Array (Array, (!))
@@ -7,7 +9,7 @@ import qualified Data.Array as A
 import Data.Attoparsec.Text
 import Data.Bifunctor (bimap)
 import Data.Char (digitToInt)
-import Data.Heap (MinHeap)
+import Data.Heap (MinPrioHeap)
 import qualified Data.Heap as H
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
@@ -21,15 +23,12 @@ type Weight = Int
 type Distance = Int
 type Steps = Int
 type Grid = Array Coord Node
-type PriorityQueue = MinHeap (Distance, Node, Steps, Direction)
+type PriorityQueue = MinPrioHeap Distance (Node, Steps, Direction)
 type DistancesMap = Map Coord Int
 type DijkstraState = State (PriorityQueue, DistancesMap) ()
 
 data Node = Node {coord :: Coord, weight :: Weight}
     deriving (Eq, Show)
-
-instance Ord Node where
-    compare (Node _ w1) (Node _ w2) = compare w1 w2
 
 -- Functions
 
@@ -46,19 +45,23 @@ shortestPathToBottomRight grid = shortestPathFromTopLeft (snd $ A.bounds grid) g
 
 shortestPathFromTopLeft :: Coord -> Grid -> Int
 shortestPathFromTopLeft endCoord grid =
-    let (_, dists) = execState (modifiedDijkstra grid) (H.singleton (0, grid ! startCoord, 0, E), M.empty)
-     in dists M.! endCoord - weight (grid ! startCoord)
+    let (_, dists) = execState (modifiedDijkstra grid) initialStateWithTrace
+        initialStateWithTrace = trace ("initialState: " ++ show initialState) initialState
+     in dists M.! endCoord
   where
     startCoord = (0, 0)
+    initialState = (H.singleton (0, (grid ! startCoord, 0, E)), M.singleton startCoord 0)
 
--- BUG: This is hanging indefinitely on the example input
 modifiedDijkstra :: Grid -> DijkstraState
 modifiedDijkstra grid = do
     (pq, dists) <- get
+    -- BUG: pq is empty for some reason!
+    trace ("pq in modifiedDijkstra: " ++ show pq) $ return ()
     case H.view pq of
-        Nothing -> return ()
-        Just ((dist, node, steps, dir), pq')
-            | M.member (coord node) dists && dist > (dists M.! coord node) -> do
+        Nothing -> do
+            return ()
+        Just ((dist, (node, steps, dir)), pq')
+            | dist > (dists M.! coord node) -> do
                 put (pq', dists)
                 modifiedDijkstra grid
             | otherwise -> do
@@ -68,11 +71,11 @@ modifiedDijkstra grid = do
                 modifiedDijkstra grid
   where
     relaxEdge :: Distance -> (Node, Steps, Direction) -> (PriorityQueue, DistancesMap) -> (PriorityQueue, DistancesMap)
-    relaxEdge dist (node, steps, dir) (pq, dists)
-        | M.member (coord node) dists && dist' < (dists M.! coord node) = (H.insert (dist', node, steps, dir) pq, M.insert (coord node) dist' dists)
+    relaxEdge dist (neighbor, steps, dir) (pq, dists)
+        | M.member (coord neighbor) dists && dist' < (dists M.! coord neighbor) = (H.insert (dist', (neighbor, steps, dir)) pq, M.insert (coord neighbor) dist' dists)
         | otherwise = (pq, dists)
       where
-        dist' = dist + weight node
+        dist' = dist + weight neighbor
 
 traverseNeighbors :: Grid -> Node -> Steps -> Direction -> [(Node, Steps, Direction)]
 traverseNeighbors grid (Node (x, y) _) sameSteps stepDir = do
