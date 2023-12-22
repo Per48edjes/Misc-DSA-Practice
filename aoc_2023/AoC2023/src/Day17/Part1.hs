@@ -5,17 +5,15 @@ import Control.Monad.State
 import Data.Array (Array, (!))
 import qualified Data.Array as A
 import Data.Attoparsec.Text
+import Data.Bifunctor (bimap)
 import Data.Char (digitToInt)
 import Data.Heap (MinHeap)
 import qualified Data.Heap as H
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import qualified Data.Text.IO as TIO
-import Day10.Part1 (Coord, Direction (..))
+import Day10.Part1 (Coord, Direction (..), getRelativeDirection, opposite)
 import Day16.Part1 (vectorDir)
-
--- TODO: Implement a modified Dijkstra's algorithm to find the shortest path on a grid graph with positive
--- edge weights where only at MOST 3 edges in the same "direction" can be traversed in a row.
 
 -- Types
 
@@ -43,9 +41,15 @@ solution filePath valueFunc = do
             Right g -> g
     return $ valueFunc grid
 
--- NOTE: Will need to subtract starting node weight from the total distance.
-shortestPath :: Grid -> Int
-shortestPath grid = undefined
+shortestPathToBottomRight :: Grid -> Int
+shortestPathToBottomRight grid = shortestPathFromTopLeft (snd $ A.bounds grid) grid
+
+shortestPathFromTopLeft :: Coord -> Grid -> Int
+shortestPathFromTopLeft endCoord grid =
+    let (_, dists) = execState (modifiedDijkstra grid) (H.singleton (0, grid ! startCoord, 0, E), M.empty)
+     in dists M.! endCoord - weight (grid ! startCoord)
+  where
+    startCoord = (0, 0)
 
 modifiedDijkstra :: Grid -> DijkstraState
 modifiedDijkstra grid = do
@@ -57,12 +61,20 @@ modifiedDijkstra grid = do
             | otherwise -> do
                 let dists' = M.insert (coord node) dist dists
                     neighborTraversals = traverseNeighbors grid node steps dir
-                    pq'' = foldr (\(d, n, s, d') -> H.insert (d, n, s, d')) pq' neighborTraversals
+                    pq'' = foldr H.insert pq' neighborTraversals
                 put (pq'', dists')
                 modifiedDijkstra grid
 
 traverseNeighbors :: Grid -> Node -> Steps -> Direction -> [(Distance, Node, Steps, Direction)]
-traverseNeighbors grid node sameSteps whenceDir = undefined
+traverseNeighbors grid (Node (x, y) weight) sameSteps stepDir = do
+    neighborCoord <- neighborCoords
+    let neighborNode@(Node _ neighborWeight) = grid ! neighborCoord
+        dist = weight + neighborWeight
+        sameSteps' = if stepDir == getRelativeDirection (x, y) neighborCoord then sameSteps + 1 else 1
+    return (dist, neighborNode, sameSteps', getRelativeDirection (x, y) neighborCoord)
+  where
+    neighborCoords = filter (A.inRange $ A.bounds grid) $ bimap (+ x) (+ y) . vectorDir <$> filter neighborCriteria [N, S, E, W]
+    neighborCriteria dir = (dir /= opposite stepDir) && ((sameSteps < 3) || (dir /= stepDir))
 
 -- Parsing
 
@@ -80,4 +92,4 @@ statefulParseNode = do
         Just w -> put (x, y + 1) >> return (Node (x - 1, y) w)
         Nothing -> put (x + 1, 0) >> statefulParseNode
   where
-    parseNode = (Just . digitToInt <$> digit) <|> (endOfLine >> return Nothing)
+    parseNode = Just . digitToInt <$> digit <|> (endOfLine >> return Nothing)
