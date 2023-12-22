@@ -69,9 +69,10 @@ modifiedDijkstra grid = do
   where
     relaxEdge :: Distance -> (Node, Steps, Direction) -> (PriorityQueue, DistancesMap) -> (PriorityQueue, DistancesMap)
     relaxEdge dist (node, steps, dir) (pq, dists)
-        -- FIX: Check triangle inequality here
-        | M.member (coord node) dists && dist > (dists M.! coord node) = (pq, dists)
-        | otherwise = (H.insert (dist, node, steps, dir) pq, M.insert (coord node) dist dists)
+        | M.member (coord node) dists && dist' < (dists M.! coord node) = (H.insert (dist', node, steps, dir) pq, M.insert (coord node) dist' dists)
+        | otherwise = (pq, dists)
+      where
+        dist' = dist + weight node
 
 traverseNeighbors :: Grid -> Node -> Steps -> Direction -> [(Node, Steps, Direction)]
 traverseNeighbors grid (Node (x, y) _) sameSteps stepDir = do
