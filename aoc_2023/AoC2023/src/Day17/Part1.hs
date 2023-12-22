@@ -51,27 +51,34 @@ shortestPathFromTopLeft endCoord grid =
   where
     startCoord = (0, 0)
 
+-- BUG: This is hanging indefinitely on the example input
 modifiedDijkstra :: Grid -> DijkstraState
 modifiedDijkstra grid = do
     (pq, dists) <- get
     case H.view pq of
         Nothing -> return ()
         Just ((dist, node, steps, dir), pq')
-            | M.member (coord node) dists && dist > (dists M.! coord node) -> modifiedDijkstra grid
+            | M.member (coord node) dists && dist > (dists M.! coord node) -> do
+                put (pq', dists)
+                modifiedDijkstra grid
             | otherwise -> do
-                let dists' = M.insert (coord node) dist dists
-                    neighborTraversals = traverseNeighbors grid node steps dir
-                    pq'' = foldr H.insert pq' neighborTraversals
+                let neighborTraversals = traverseNeighbors grid node steps dir
+                    (pq'', dists') = foldr (relaxEdge dist) (pq', dists) neighborTraversals
                 put (pq'', dists')
                 modifiedDijkstra grid
+  where
+    relaxEdge :: Distance -> (Node, Steps, Direction) -> (PriorityQueue, DistancesMap) -> (PriorityQueue, DistancesMap)
+    relaxEdge dist (node, steps, dir) (pq, dists)
+        -- FIX: Check triangle inequality here
+        | M.member (coord node) dists && dist > (dists M.! coord node) = (pq, dists)
+        | otherwise = (H.insert (dist, node, steps, dir) pq, M.insert (coord node) dist dists)
 
-traverseNeighbors :: Grid -> Node -> Steps -> Direction -> [(Distance, Node, Steps, Direction)]
-traverseNeighbors grid (Node (x, y) weight) sameSteps stepDir = do
+traverseNeighbors :: Grid -> Node -> Steps -> Direction -> [(Node, Steps, Direction)]
+traverseNeighbors grid (Node (x, y) _) sameSteps stepDir = do
     neighborCoord <- neighborCoords
-    let neighborNode@(Node _ neighborWeight) = grid ! neighborCoord
-        dist = weight + neighborWeight
+    let neighborNode = grid ! neighborCoord
         sameSteps' = if stepDir == getRelativeDirection (x, y) neighborCoord then sameSteps + 1 else 1
-    return (dist, neighborNode, sameSteps', getRelativeDirection (x, y) neighborCoord)
+    return (neighborNode, sameSteps', getRelativeDirection (x, y) neighborCoord)
   where
     neighborCoords = filter (A.inRange $ A.bounds grid) $ bimap (+ x) (+ y) . vectorDir <$> filter neighborCriteria [N, S, E, W]
     neighborCriteria dir = (dir /= opposite stepDir) && ((sameSteps < 3) || (dir /= stepDir))
