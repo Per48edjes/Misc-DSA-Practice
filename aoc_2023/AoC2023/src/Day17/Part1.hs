@@ -49,7 +49,9 @@ shortestPathFromTopLeft endCoord grid neighborFunc =
         initialState = (H.singleton (0, (grid ! startCoord, 0, E)), M.singleton startCoord 0)
         (_, dists) = execState (modifiedDijkstra grid neighborFunc) initialState
      in
-        dists M.! endCoord - weight (grid ! startCoord)
+        case endCoord `M.lookup` dists of
+            Just d -> d - weight (grid ! startCoord)
+            Nothing -> error "No path found"
 
 modifiedDijkstra :: Grid -> (Steps -> Direction -> Direction -> Bool) -> DijkstraState
 modifiedDijkstra grid neighborFunc = do
