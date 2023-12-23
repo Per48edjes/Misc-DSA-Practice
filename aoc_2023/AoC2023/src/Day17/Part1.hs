@@ -1,7 +1,5 @@
 module Day17.Part1 where
 
-import Debug.Trace (trace, traceM)
-
 import Control.Applicative ((<|>))
 import Control.Monad.State.Strict
 import Data.Array (Array, (!))
@@ -42,19 +40,19 @@ solution filePath valueFunc = do
     return $ valueFunc grid
 
 shortestPathToBottomRight :: Grid -> Int
-shortestPathToBottomRight grid = shortestPathFromTopLeft (snd $ A.bounds grid) grid
+shortestPathToBottomRight grid = shortestPathFromTopLeft (snd $ A.bounds grid) grid neighborCriteria
 
-shortestPathFromTopLeft :: Coord -> Grid -> Int
-shortestPathFromTopLeft endCoord grid =
+shortestPathFromTopLeft :: Coord -> Grid -> (Steps -> Direction -> Direction -> Bool) -> Int
+shortestPathFromTopLeft endCoord grid neighborFunc =
     let
         startCoord = (0, 0)
         initialState = (H.singleton (0, (grid ! startCoord, 0, E)), M.singleton startCoord 0)
-        (_, dists) = execState (modifiedDijkstra grid) initialState
+        (_, dists) = execState (modifiedDijkstra grid neighborFunc) initialState
      in
-        dists M.! endCoord
+        dists M.! endCoord - weight (grid ! startCoord)
 
-modifiedDijkstra :: Grid -> DijkstraState
-modifiedDijkstra grid = do
+modifiedDijkstra :: Grid -> (Steps -> Direction -> Direction -> Bool) -> DijkstraState
+modifiedDijkstra grid neighborFunc = do
     (pq, dists) <- get
     case H.view pq of
         Nothing -> do
@@ -62,12 +60,12 @@ modifiedDijkstra grid = do
         Just ((dist, (node, steps, dir)), pq')
             | dist > (dists M.! coord node) -> do
                 put (pq', dists)
-                modifiedDijkstra grid
+                modifiedDijkstra grid neighborFunc
             | otherwise -> do
-                let neighborTraversals = traverseNeighbors grid node steps dir
+                let neighborTraversals = traverseNeighbors grid neighborFunc node steps dir
                     (pq'', dists') = L.foldl' (relaxEdge dist) (pq', dists) neighborTraversals
                 put (pq'', dists')
-                modifiedDijkstra grid
+                modifiedDijkstra grid neighborFunc
   where
     relaxEdge :: Distance -> (PriorityQueue, DistancesMap) -> (Node, Steps, Direction) -> (PriorityQueue, DistancesMap)
     relaxEdge dist (pq, dists) (neighbor, steps, dir)
@@ -76,15 +74,17 @@ modifiedDijkstra grid = do
       where
         dist' = dist + weight neighbor
 
-traverseNeighbors :: Grid -> Node -> Steps -> Direction -> [(Node, Steps, Direction)]
-traverseNeighbors grid (Node (x, y) _) sameSteps stepDir = do
+traverseNeighbors :: Grid -> (Steps -> Direction -> Direction -> Bool) -> Node -> Steps -> Direction -> [(Node, Steps, Direction)]
+traverseNeighbors grid neighborFunc (Node (x, y) _) sameSteps stepDir = do
     neighborCoord <- neighborCoords
     let neighborNode = grid ! neighborCoord
         sameSteps' = if stepDir == getRelativeDirection (x, y) neighborCoord then sameSteps + 1 else 1
     return (neighborNode, sameSteps', getRelativeDirection (x, y) neighborCoord)
   where
-    neighborCoords = filter (A.inRange $ A.bounds grid) $ bimap (+ x) (+ y) . vectorDir <$> filter neighborCriteria [N, S, E, W]
-    neighborCriteria dir = (dir /= opposite stepDir) && ((sameSteps < 3) || (dir /= stepDir))
+    neighborCoords = filter (A.inRange $ A.bounds grid) $ bimap (+ x) (+ y) . vectorDir <$> filter (neighborFunc sameSteps stepDir) [N, S, E, W]
+
+neighborCriteria :: Steps -> Direction -> Direction -> Bool
+neighborCriteria sameSteps stepDir newDir = (newDir /= opposite stepDir) && ((sameSteps <= 3) || (newDir /= stepDir))
 
 -- Parsing
 

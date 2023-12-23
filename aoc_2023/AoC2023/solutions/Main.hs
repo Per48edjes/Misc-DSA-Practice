@@ -68,4 +68,4 @@ main = do
     putStrLn "Day 15, Part 2: " >> Day15.Part1.solution "inputs/day15.txt" Day15.Part2.totalFocusingPower >>= print
     -- putStrLn "Day 16, Part 1: " >> Day16.Part1.solution "inputs/day16.txt" Day16.Part1.countEnergizedTiles >>= print
     -- putStrLn "Day 16, Part 2: " >> Day16.Part1.solution "inputs/day16.txt" Day16.Part2.countEnergizedTiles' >>= print
-    putStrLn "Day 17, Part 1: " >> Day17.Part1.solution "inputs/day17_test.txt" Day17.Part1.shortestPathToBottomRight >>= print
+    putStrLn "Day 17, Part 1: " >> Day17.Part1.solution "inputs/day17.txt" Day17.Part1.shortestPathToBottomRight >>= print
