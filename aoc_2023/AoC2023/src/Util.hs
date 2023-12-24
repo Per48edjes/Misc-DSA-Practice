@@ -1,6 +1,6 @@
 module Util where
 
-import Data.List (subsequences, tails)
+import Data.List (groupBy, subsequences, tails)
 import Data.Maybe (isNothing)
 import Data.Text (Text)
 import qualified Data.Text as T
