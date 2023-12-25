@@ -2,6 +2,8 @@
 
 module Day18.Part1 (solution, totalTrenchVolume) where
 
+import Debug.Trace (trace)
+
 import Control.Monad.State.Strict
 import Data.Attoparsec.Text
 import Data.Function (on)
