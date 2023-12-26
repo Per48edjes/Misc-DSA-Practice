@@ -34,10 +34,10 @@ solution filePath valueFunc = do
     return $ valueFunc digPlan
 
 totalTrenchVolume :: [PlanEntry] -> Int
-totalTrenchVolume = calculateTrenchInterior . getTrench
+totalTrenchVolume plan = (S.size . getTrenchCoords . getTrench $ plan) + (calculateTrenchInterior . getTrench $ plan)
 
 calculateTrenchInterior :: Set (Index, Coord) -> Int
-calculateTrenchInterior trench = S.size (getTrenchCoords trench) + S.size (getInteriorCoords trench)
+calculateTrenchInterior trench = S.size (getInteriorCoords trench)
 
 getTrench :: [PlanEntry] -> Set (Index, Coord)
 getTrench plan =
@@ -52,8 +52,8 @@ getTrenchCoords = S.map snd
 getInteriorCoords :: Set (Index, Coord) -> Set Coord
 getInteriorCoords trench =
     let ((minX, maxX), (minY, maxY)) = getBoundingDimensions trench
-        candidateCoords = [(x, y) | x <- [minX .. maxX], y <- [minY .. maxY], (x, y) `S.notMember` S.map snd trench]
-     in S.fromList $ filter (\c -> and $ (raycastDir trench <$> [S]) <*> [c]) candidateCoords
+        candidateCoords = [(x, y) | x <- [minX .. maxX], y <- [minY .. maxY], (x, y) `S.notMember` getTrenchCoords trench]
+     in S.fromList $ filter (raycastLeft trench) candidateCoords
 
 dig :: (Index, PlanEntry) -> DigState
 dig (i, (dir, steps, _)) = do
@@ -63,38 +63,34 @@ dig (i, (dir, steps, _)) = do
         newVisited = S.union visited (S.fromList newCoords)
     put (snd . last $ newCoords, newVisited)
 
-{-
--- BUG: Need to reevaluate grouping strategy as it doesn't work for all cases
--- WARN: Also need to consider edge case where trench loops back on itself,
--- the group logic will fail in that case if ray is othrogonal to the first
--- ans last instruction directions
--}
-raycastDir :: Set (Index, Coord) -> Direction -> Coord -> Bool
-raycastDir trench dir coord = odd $ length (trace (show $ "Coord: " ++ show coord ++ ", " ++ show dir ++ " Walls: " ++ show groupedTrenchCoords) groupedTrenchCoords)
+-- | Point-in-a-polygon algorithm that casts ray from right (leftward) and counts the number of times it enters and leaves polygon formed by the trench walls
+raycastLeft :: Set (Index, Coord) -> Coord -> Bool
+raycastLeft trench coord@(x, _) =
+    let
+        ((_, _), (_, maxY)) = getBoundingDimensions trench
+        (x', y') = vectorDir W
+        ray = S.fromList $ L.takeWhile (/= coord) $ iterate (\c -> (fst c + x', snd c + y')) (x, maxY + 1)
+        trenchCoords = S.toList $ S.filter (\(_, c) -> c `S.member` ray) trench
+        groupedTrenchCoords = groupTrenchWalls trenchCoords
+     in
+        (odd . sum . determineGroupConcavity) groupedTrenchCoords
   where
-    ((minX, maxX), (minY, maxY)) = getBoundingDimensions trench
-    (x', y') = vectorDir dir
-    compVal = case dir of
-        N -> minX
-        S -> maxX
-        E -> maxY
-        W -> minY
-        _ -> error "Invalid traversal direction"
-    compElem = case dir of
-        N -> fst
-        S -> fst
-        E -> snd
-        W -> snd
-        _ -> error "Invalid traversal direction"
-    ray = S.fromList $ L.take (abs (compVal - compElem coord) + 1) $ iterate (\(x, y) -> (x + x', y + y')) coord
-    trenchCoords = S.toList $ S.filter (\(_, c) -> c `S.member` ray) trench
-    groupedTrenchCoords = groupTrenchWalls dir trenchCoords
+    determineGroupConcavity :: [[(Index, Coord)]] -> [Int]
+    determineGroupConcavity groups = do
+        group <- groups
+        let (minGroupY, maxGroupY) = (snd $ snd (head group), snd $ snd (last group))
+            isConvex =
+                S.member (x - 1, minGroupY) trench'
+                    && S.member (x + 1, maxGroupY) trench'
+                    || S.member (x + 1, minGroupY) trench'
+                        && S.member (x - 1, maxGroupY) trench'
+        return $ if isConvex then 1 else 0
+      where
+        trench' = getTrenchCoords trench
 
-groupTrenchWalls :: Direction -> [(Index, Coord)] -> [[(Index, Coord)]]
-groupTrenchWalls dir trenchCoords
-    | dir == E || dir == W = G.groupBy (\(i1, (_, y1)) (i2, (_, y2)) -> abs (y1 - y2) == 1 && (i1 == i2 || abs (i1 - i2) == 1)) . L.sortBy (compare `on` snd . snd) $ trenchCoords
-    | dir == N || dir == S = G.groupBy (\(i1, (x1, _)) (i2, (x2, _)) -> abs (x1 - x2) == 1 && (i1 == i2 || abs (i1 - i2) == 1)) . L.sortBy (compare `on` fst . snd) $ trenchCoords
-    | otherwise = error "Invalid traversal direction"
+-- | Groups together trench walls that are adjacent to each other
+groupTrenchWalls :: [(Index, Coord)] -> [[(Index, Coord)]]
+groupTrenchWalls = G.groupBy (\(i1, (_, y1)) (i2, (_, y2)) -> abs (y1 - y2) == 1 && (i1 == i2 || abs (i1 - i2) == 1)) . L.sortBy (compare `on` snd . snd)
 
 -- | Gets a the bounding coordinates a trench
 getBoundingDimensions :: Set (Index, Coord) -> ((Int, Int), (Int, Int))
