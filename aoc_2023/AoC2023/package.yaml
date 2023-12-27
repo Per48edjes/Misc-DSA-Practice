@@ -88,6 +88,8 @@ library:
     - array
     - attoparsec
     - megaparsec
+    - Chart
+    - Chart-diagrams
     - groupBy
     - bytestring
     - containers

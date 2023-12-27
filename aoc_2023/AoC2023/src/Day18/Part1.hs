@@ -1,8 +1,9 @@
 {-# OPTIONS_GHC -Wno-unused-do-bind #-}
 
-module Day18.Part1 (solution, totalTrenchVolume) where
+module Day18.Part1 (solution, totalTrenchVolume, plotCoordinates) where
 
-import Debug.Trace (trace)
+import Graphics.Rendering.Chart.Backend.Diagrams
+import Graphics.Rendering.Chart.Easy hiding (Index)
 
 import Control.Monad.State.Strict
 import Data.Attoparsec.Text
@@ -32,6 +33,20 @@ solution filePath valueFunc = do
             Left err -> error err
             Right plan -> plan
     return $ valueFunc digPlan
+
+plotCoordinates :: FilePath -> IO ()
+plotCoordinates filePath = do
+    input <- TIO.readFile filePath
+    let trench = case parseOnly parsePlan input of
+            Left err -> error err
+            Right plan -> getTrench plan
+        interior = S.toList $ getInteriorCoords trench
+        bounding = S.toList $ getTrenchCoords trench
+    toFile def "plot.svg" $ do
+        layout_title .= "Day 18: Trench Digging"
+        setColors [opaque blue, opaque red]
+        plot (points "Trench" bounding)
+        plot (points "Interior Points" interior)
 
 totalTrenchVolume :: [PlanEntry] -> Int
 totalTrenchVolume plan = (S.size . getTrenchCoords . getTrench $ plan) + (calculateTrenchInterior . getTrench $ plan)
@@ -71,9 +86,8 @@ raycastLeft trench coord@(x, _) =
         (x', y') = vectorDir W
         ray = S.fromList $ L.takeWhile (/= coord) $ iterate (\c -> (fst c + x', snd c + y')) (x, maxY + 1)
         trenchCoords = S.toList $ S.filter (\(_, c) -> c `S.member` ray) trench
-        groupedTrenchCoords = groupTrenchWalls trenchCoords
      in
-        (odd . sum . determineGroupConcavity) groupedTrenchCoords
+        (odd . sum . determineGroupConcavity . groupTrenchWalls) trenchCoords
   where
     determineGroupConcavity :: [[(Index, Coord)]] -> [Int]
     determineGroupConcavity groups = do
@@ -87,10 +101,10 @@ raycastLeft trench coord@(x, _) =
         return $ if isConvex then 1 else 0
       where
         trench' = getTrenchCoords trench
-
--- | Groups together trench walls that are adjacent to each other
-groupTrenchWalls :: [(Index, Coord)] -> [[(Index, Coord)]]
-groupTrenchWalls = G.groupBy (\(i1, (_, y1)) (i2, (_, y2)) -> abs (y1 - y2) == 1 && (i1 == i2 || abs (i1 - i2) == 1)) . L.sortBy (compare `on` snd . snd)
+    groupTrenchWalls :: [(Index, Coord)] -> [[(Index, Coord)]]
+    groupTrenchWalls = G.groupBy (\(i1, (_, y1)) (i2, (_, y2)) -> abs (y1 - y2) == 1 && (i1 == i2 || abs (i1 - i2) == 1 || abs (i1 - i2) == maxIdx)) . L.sortBy (compare `on` snd . snd)
+      where
+        maxIdx = maximum . S.map fst $ trench
 
 -- | Gets a the bounding coordinates a trench
 getBoundingDimensions :: Set (Index, Coord) -> ((Int, Int), (Int, Int))
