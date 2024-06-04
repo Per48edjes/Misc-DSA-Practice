@@ -10,6 +10,7 @@ class UnionFind:
             self.label[x] = self.find(self.label[x])
             return self.label[x]
 
+    # NOTE: Unions by size
     def union(self, x, y):
         x_group = self.find(x)
         y_group = self.find(y)
