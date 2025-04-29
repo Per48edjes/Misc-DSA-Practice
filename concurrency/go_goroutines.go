@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-// var mu sync.Mutex
+var mu sync.Mutex
 
 func increment(container []int, pos int) {
-	// mu.Lock()
-	// defer mu.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 
 	if pos >= 0 && pos < len(container) {
 		current := container[pos]
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(100 * time.Microsecond)
 		container[pos] = current + 1
 	} else {
 		panic("Index out of bounds")
@@ -34,5 +34,5 @@ func main() {
 		}()
 	}
 	wg.Wait()
-	fmt.Println(shared)
+	fmt.Println(shared[0])
 }
