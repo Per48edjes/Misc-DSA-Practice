@@ -6,23 +6,23 @@ from binarytree import Node, build
 
 
 def inorder_traversal(
-    node: Node | None, revalue: bool = False
+    node: Node | None, relabel: bool = False
 ) -> Generator[Any | None, int, None]:
     """
     Return a generator that yields inorder traversal of a binary tree rooted at this node
     """
     if node:
         if node.left:
-            yield from inorder_traversal(node.left, revalue)
+            yield from inorder_traversal(node.left, relabel)
         new_value = yield node.value
-        if revalue and new_value is not None:
+        if relabel and new_value is not None:
             node.value = new_value
         if node.right:
-            yield from inorder_traversal(node.right, revalue)
+            yield from inorder_traversal(node.right, relabel)
 
 
 def relabel_tree(root: Node | None, new_values: list[Any]):
-    gen = inorder_traversal(root, revalue=True)
+    gen = inorder_traversal(root, relabel=True)
     next(gen)  # Primes the generator, but lose the first value :(
     for new_value in new_values:
         try:
