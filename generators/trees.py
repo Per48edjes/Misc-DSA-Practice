@@ -3,25 +3,25 @@ from typing import Any, Generator
 from binarytree import Node, build
 
 
-def inorder_traversal(
-    node: Node | None, relabel: bool = False
-) -> Generator[Any | None, int, None]:
+def inorder_traversal(node: Node | None) -> Generator[Any | None, Any, None]:
     """
     Return a generator that yields inorder traversal of a binary tree rooted at this node
     """
     if node:
         if node.left:
-            yield from inorder_traversal(node.left, relabel)
-        new_value = yield node.value
-        if relabel and new_value is not None:
+            yield from inorder_traversal(node.left)
+        if new_value := (yield node.value):
             node.value = new_value
         if node.right:
-            yield from inorder_traversal(node.right, relabel)
+            yield from inorder_traversal(node.right)
 
 
 def relabel_tree(root: Node | None, new_values: list[Any]):
-    gen = inorder_traversal(root, relabel=True)
-    next(gen)  # Primes the generator, but lose the first value :(
+    """
+    Relabel the tree with the given new values
+    """
+    gen = inorder_traversal(root)
+    next(gen)  # Primes the generator, but lose the first value
     for new_value in new_values:
         try:
             gen.send(new_value)  # Send the new value to replace it
